@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapQuest API Routing Table</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 { margin-top: 0; }
+        .form-group { 
+            margin-bottom: 15px; 
+            display: flex;
+            align-items: center;
+        }
+        label { 
+            width: 150px; 
+            font-weight: bold; 
+        }
+        input { 
+            padding: 8px; 
+            width: 300px; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button { 
+            padding: 10px 20px; 
+            background-color: #007BFF; 
+            color: white; 
+            border: none; 
+            border-radius: 4px;
+            cursor: pointer; 
+            font-weight: bold;
+        }
+        button:hover { background-color: #0056b3; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 30px; 
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 12px; 
+            text-align: left; 
+        }
+        th { background-color: #f2f2f2; }
+        .error { color: #d9534f; font-weight: bold; }
+        .success { color: #5cb85c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>MapQuest Route Fetcher</h2>
+        
+        <div class="form-group">
+            <label for="start">Starting Location:</label>
+            <input type="text" id="start" placeholder="e.g., New York, NY">
+        </div>
+        <div class="form-group">
+            <label for="end">Destination:</label>
+            <input type="text" id="end" placeholder="e.g., Los Angeles, CA">
+        </div>
+        
+        <button onclick="fetchRoute()">Get Route Data</button>
+        <p id="status-msg"></p>
+
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th>Input: Start</th>
+                    <th>Input: Destination</th>
+                    <th>Output: Distance (miles)</th>
+                    <th>Output: Est. Time</th>
+                    <th>Output: API Status</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Your provided MapQuest API Key
+        const apiKey = 'NJIvXtsoIDHtqvcvkzQhyBVv1MPcZvUa';
+
+        async function fetchRoute() {
+            const startInput = document.getElementById('start').value.trim();
+            const endInput = document.getElementById('end').value.trim();
+            const statusMsg = document.getElementById('status-msg');
+
+            // Input Validation
+            if (!startInput || !endInput) {
+                statusMsg.innerHTML = '<span class="error">Please enter both a starting location and a destination.</span>';
+                return;
+            }
+
+            statusMsg.innerHTML = 'Fetching data from MapQuest API...';
+
+            // Constructing the MapQuest Directions API GET request URL
+            const url = `https://www.mapquestapi.com/directions/v2/route?key=${apiKey}&from=${encodeURIComponent(startInput)}&to=${encodeURIComponent(endInput)}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // MapQuest returns a status code of 0 for successful routing
+                if (data.info.statuscode === 0) {
+                    statusMsg.innerHTML = '<span class="success">Data fetched successfully!</span>';
+                    
+                    // Extract inputs and outputs
+                    const distance = data.route.distance.toFixed(2);
+                    const formattedTime = data.route.formattedTime;
+                    const statusCode = data.info.statuscode;
+
+                    // Update the table
+                    appendRow(startInput, endInput, distance, formattedTime, statusCode);
+                } else {
+                    statusMsg.innerHTML = `<span class="error">API Error: ${data.info.messages[0]}</span>`;
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                statusMsg.innerHTML = '<span class="error">Failed to connect to the MapQuest API. Check your internet connection or the browser console.</span>';
+            }
+        }
+
+        function appendRow(start, end, distance, time, statusCode) {
+            const tbody = document.getElementById('table-body');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${start}</td>
+                <td>${end}</td>
+                <td>${distance}</td>
+                <td>${time}</td>
+                <td>${statusCode === 0 ? '0 (Success)' : statusCode}</td>
+            `;
+
+            // Appends the new row to the end of the table
+            tbody.appendChild(row);
+        }
+    </script>
+</body>
+</html>
