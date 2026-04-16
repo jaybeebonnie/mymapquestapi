@@ -3,152 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MapQuest API Routing Table</title>
+    <title>Comprehensive MapQuest Data Extraction</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 40px; 
-            background-color: #f9f9f9;
-            color: #333;
+        :root {
+            --primary-color: #2c3e50;
+            --button-color: #2980b9;
+            --button-hover: #1f618d;
+            --background: #f0f2f5;
+            --surface: #ffffff;
+            --border-color: #e0e4e8;
+            --text-main: #333333;
         }
-        .container { 
-            max-width: 900px; 
-            margin: auto; 
-            background: white; 
-            padding: 30px; 
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        h2 { margin-top: 0; }
-        .form-group { 
-            margin-bottom: 15px; 
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
             display: flex;
-            align-items: center;
+            justify-content: center;
+            font-size: 14px;
         }
-        label { 
-            width: 150px; 
-            font-weight: bold; 
+
+        .container {
+            background-color: var(--surface);
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-        input { 
-            padding: 8px; 
-            width: 300px; 
-            border: 1px solid #ccc;
+
+        h2, h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        h3 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .controls-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            background-color: #fafbfc;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        input {
+            padding: 8px;
+            font-size: 0.95em;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
         }
-        button { 
-            padding: 10px 20px; 
-            background-color: #007BFF; 
-            color: white; 
-            border: none; 
+
+        input:focus {
+            outline: none;
+            border-color: var(--button-color);
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: var(--button-color);
+            border: none;
             border-radius: 4px;
-            cursor: pointer; 
-            font-weight: bold;
+            cursor: pointer;
+            height: 35px;
         }
-        button:hover { background-color: #0056b3; }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 30px; 
+
+        button:hover {
+            background-color: var(--button-hover);
         }
-        th, td { 
-            border: 1px solid #ddd; 
-            padding: 12px; 
-            text-align: left; 
+
+        #status-msg {
+            font-size: 0.9em;
+            margin-top: -5px;
+            margin-bottom: 15px;
+            min-height: 18px;
         }
-        th { background-color: #f2f2f2; }
-        .error { color: #d9534f; font-weight: bold; }
-        .success { color: #5cb85c; font-weight: bold; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-wrapper {
+            overflow-y: auto;
+            max-height: 600px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background-color: var(--surface);
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        th {
+            padding: 10px 12px;
+            font-weight: 500;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 8px 12px;
+            font-size: 0.85em;
+            border-bottom: 1px solid var(--border-color);
+            word-break: break-all;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9f9;
+        }
+
+        .key-col {
+            font-weight: 600;
+            color: #2c3e50;
+            width: 40%;
+            background-color: #fafbfc;
+        }
+
+        .error { color: #d32f2f; font-weight: 600; }
+        .success { color: #2e7d32; font-weight: 600; }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>MapQuest Route Fetcher</h2>
+        <h2>MapQuest API Diagnostic Interface</h2>
         
-        <div class="form-group">
-            <label for="start">Starting Location:</label>
-            <input type="text" id="start" placeholder="e.g., New York, NY">
+        <div class="controls-wrapper">
+            <div class="input-group">
+                <label for="start">Origin Node</label>
+                <input type="text" id="start" placeholder="e.g., Boston, MA">
+            </div>
+            <div class="input-group">
+                <label for="end">Destination Node</label>
+                <input type="text" id="end" placeholder="e.g., Seattle, WA">
+            </div>
+            <button onclick="executeRoutingRequest()">Execute Request</button>
         </div>
-        <div class="form-group">
-            <label for="end">Destination:</label>
-            <input type="text" id="end" placeholder="e.g., Los Angeles, CA">
-        </div>
-        
-        <button onclick="fetchRoute()">Get Route Data</button>
+
         <p id="status-msg"></p>
 
-        <table id="results-table">
-            <thead>
-                <tr>
-                    <th>Input: Start</th>
-                    <th>Input: Destination</th>
-                    <th>Output: Distance (miles)</th>
-                    <th>Output: Est. Time</th>
-                    <th>Output: API Status</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                </tbody>
-        </table>
+        <div class="grid-container" id="data-panels" style="display: none;">
+            <div>
+                <h3>Transmitted Inputs</h3>
+                <div class="table-wrapper">
+                    <table id="inputs-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter Key</th>
+                                <th>Transmitted Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inputs-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h3>Exhaustive API Outputs</h3>
+                <div class="table-wrapper">
+                    <table id="outputs-table">
+                        <thead>
+                            <tr>
+                                <th>Response Data Vector (Flattened Key)</th>
+                                <th>Computed Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="outputs-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Your provided MapQuest API Key
         const apiKey = 'NJIvXtsoIDHtqvcvkzQhyBVv1MPcZvUa';
 
-        async function fetchRoute() {
+        /**
+         * Recursively flattens a nested JSON object into a single-depth dictionary.
+         * Arrays and nested objects are consolidated into dot-notation paths.
+         */
+        function flattenJSON(data) {
+            const result = {};
+            function recurse(cur, prop) {
+                if (Object(cur) !== cur) {
+                    result[prop] = cur;
+                } else if (Array.isArray(cur)) {
+                    for (let i = 0, l = cur.length; i < l; i++)
+                        recurse(cur[i], prop + "[" + i + "]");
+                    if (cur.length === 0) result[prop] = "[]";
+                } else {
+                    let isEmpty = true;
+                    for (let p in cur) {
+                        isEmpty = false;
+                        recurse(cur[p], prop ? prop + "." + p : p);
+                    }
+                    if (isEmpty && prop) result[prop] = "{}";
+                }
+            }
+            recurse(data, "");
+            return result;
+        }
+
+        function populateTable(tbodyId, dataObject) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = ''; // Clear previous iterations
+            
+            for (const [key, value] of Object.entries(dataObject)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="key-col">${key}</td>
+                    <td>${value !== null && value !== undefined ? value : '<em>null</em>'}</td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        async function executeRoutingRequest() {
             const startInput = document.getElementById('start').value.trim();
             const endInput = document.getElementById('end').value.trim();
             const statusMsg = document.getElementById('status-msg');
+            const dataPanels = document.getElementById('data-panels');
 
-            // Input Validation
             if (!startInput || !endInput) {
-                statusMsg.innerHTML = '<span class="error">Please enter both a starting location and a destination.</span>';
+                statusMsg.innerHTML = '<span class="error">Validation Error: Both origin and destination nodes are required.</span>';
+                dataPanels.style.display = 'none';
                 return;
             }
 
-            statusMsg.innerHTML = 'Fetching data from MapQuest API...';
+            statusMsg.innerHTML = 'Establishing connection to MapQuest API...';
+            
+            const encodedStart = encodeURIComponent(startInput);
+            const encodedEnd = encodeURIComponent(endInput);
+            const url = `https://www.mapquestapi.com/directions/v2/route?key=${apiKey}&from=${encodedStart}&to=${encodedEnd}`;
 
-            // Constructing the MapQuest Directions API GET request URL
-            const url = `https://www.mapquestapi.com/directions/v2/route?key=${apiKey}&from=${encodeURIComponent(startInput)}&to=${encodeURIComponent(endInput)}`;
+            // 1. Capture ALL Inputs
+            const inputData = {
+                "Base URL": "https://www.mapquestapi.com/directions/v2/route",
+                "HTTP Method": "GET",
+                "Query Parameter: key": apiKey,
+                "Query Parameter: from (raw)": startInput,
+                "Query Parameter: from (encoded)": encodedStart,
+                "Query Parameter: to (raw)": endInput,
+                "Query Parameter: to (encoded)": encodedEnd,
+                "Full Request Endpoint": url
+            };
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // MapQuest returns a status code of 0 for successful routing
-                if (data.info.statuscode === 0) {
-                    statusMsg.innerHTML = '<span class="success">Data fetched successfully!</span>';
+                if (data.info && data.info.statuscode === 0) {
+                    statusMsg.innerHTML = '<span class="success">Data transmission successful. Parsing results.</span>';
                     
-                    // Extract inputs and outputs
-                    const distance = data.route.distance.toFixed(2);
-                    const formattedTime = data.route.formattedTime;
-                    const statusCode = data.info.statuscode;
+                    // 2. Capture and Flatten ALL Outputs
+                    const flattenedOutputs = flattenJSON(data);
 
-                    // Update the table
-                    appendRow(startInput, endInput, distance, formattedTime, statusCode);
+                    // 3. Render Tables
+                    populateTable('inputs-body', inputData);
+                    populateTable('outputs-body', flattenedOutputs);
+                    
+                    dataPanels.style.display = 'grid';
+
                 } else {
-                    statusMsg.innerHTML = `<span class="error">API Error: ${data.info.messages[0]}</span>`;
+                    const errorMessage = data.info && data.info.messages ? data.info.messages[0] : 'Unknown API failure';
+                    statusMsg.innerHTML = `<span class="error">API Error Encountered: ${errorMessage}</span>`;
+                    dataPanels.style.display = 'none';
                 }
             } catch (error) {
-                console.error('Error fetching data:', error);
-                statusMsg.innerHTML = '<span class="error">Failed to connect to the MapQuest API. Check your internet connection or the browser console.</span>';
+                console.error('Network Error:', error);
+                statusMsg.innerHTML = '<span class="error">Network exception occurred. Please verify connectivity.</span>';
+                dataPanels.style.display = 'none';
             }
-        }
-
-        function appendRow(start, end, distance, time, statusCode) {
-            const tbody = document.getElementById('table-body');
-            const row = document.createElement('tr');
-
-            row.innerHTML = `
-                <td>${start}</td>
-                <td>${end}</td>
-                <td>${distance}</td>
-                <td>${time}</td>
-                <td>${statusCode === 0 ? '0 (Success)' : statusCode}</td>
-            `;
-
-            // Appends the new row to the end of the table
-            tbody.appendChild(row);
         }
     </script>
 </body>
